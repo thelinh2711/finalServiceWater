@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface TieredPriceRepository extends JpaRepository<TieredPrice, Long> {
+public interface TieredPriceRepository extends JpaRepository<TieredPrice, Integer> {
 
     List<TieredPrice> findByServiceType(WaterServiceType serviceType);
 

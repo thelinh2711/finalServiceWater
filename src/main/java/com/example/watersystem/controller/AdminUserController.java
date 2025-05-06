@@ -84,7 +84,7 @@ public class AdminUserController {
     }
 
     @GetMapping("/users/{id}")
-    public String getAdminUserById(@PathVariable Long id, Model model) {
+    public String getAdminUserById(@PathVariable Integer id, Model model) {
         Optional<AdminUser> adminUser = adminUserService.getAdminUserById(id);
         if (adminUser.isPresent()) {
             model.addAttribute("adminUser", adminUser.get());
@@ -114,7 +114,7 @@ public class AdminUserController {
     }
 
     @GetMapping("/users/edit/{id}")
-    public String showEditUserForm(@PathVariable Long id, Model model) {
+    public String showEditUserForm(@PathVariable Integer id, Model model) {
         Optional<AdminUser> adminUser = adminUserService.getAdminUserById(id);
         if (adminUser.isPresent()) {
             model.addAttribute("adminUser", adminUser.get());
@@ -125,30 +125,4 @@ public class AdminUserController {
         }
     }
 
-    @PostMapping("/users/update/{id}")
-    public String updateAdminUser(@PathVariable Long id, @ModelAttribute AdminUser adminUser, Model model) {
-        try {
-            Optional<AdminUser> updated = adminUserService.updateAdminUser(id, adminUser);
-            if (updated.isPresent()) {
-                return "redirect:/admin/users";
-            } else {
-                model.addAttribute("error", "Không tìm thấy người dùng");
-                return "error"; // Nếu bạn có trang error.html
-            }
-        } catch (Exception e) {
-            model.addAttribute("error", e.getMessage());
-            model.addAttribute("adminUser", adminUser);
-            return "user-form"; // Nếu bạn có trang user-form.html
-        }
-    }
-
-    @GetMapping("/users/delete/{id}")
-    public String deleteAdminUser(@PathVariable Long id, Model model) {
-        boolean deleted = adminUserService.deleteAdminUser(id);
-        if (!deleted) {
-            model.addAttribute("error", "Không tìm thấy người dùng");
-            return "error"; // Nếu bạn có trang error.html
-        }
-        return "redirect:/admin/users";
-    }
 }

@@ -58,10 +58,9 @@ public class AdminUserService {
     }
 
     @Transactional(readOnly = true)
-    public Optional<AdminUser> getAdminUserById(Long id) {
+    public Optional<AdminUser> getAdminUserById(Integer id) {
         return adminUserRepository.findById(id);
     }
-
 
     @Transactional
     public AdminUser createAdminUser(AdminUser adminUser) {
@@ -69,45 +68,5 @@ public class AdminUserService {
         return adminUserRepository.save(adminUser);
     }
 
-    @Transactional
-    public Optional<AdminUser> updateAdminUser(Long id, AdminUser adminUserDetails) {
-        return adminUserRepository.findById(id)
-                .map(adminUser -> {
-                    adminUser.setUsername(adminUserDetails.getUsername());
-                    adminUser.setFullName(adminUserDetails.getFullName());
-                    adminUser.setEmail(adminUserDetails.getEmail());
-                    adminUser.setRole(adminUserDetails.getRole());
 
-                    // Chỉ cập nhật mật khẩu nếu được cung cấp
-                    if (adminUserDetails.getPassword() != null && !adminUserDetails.getPassword().isEmpty()) {
-                        adminUser.setPassword(passwordEncoder.encode(adminUserDetails.getPassword()));
-                    }
-
-                    return adminUserRepository.save(adminUser);
-                });
-    }
-
-    @Transactional
-    public boolean deleteAdminUser(Long id) {
-        return adminUserRepository.findById(id)
-                .map(adminUser -> {
-                    adminUserRepository.delete(adminUser);
-                    return true;
-                }).orElse(false);
-    }
-
-    @Transactional(readOnly = true)
-    public List<AdminUser> getAdminUsersByRole(String role) {
-        return adminUserRepository.findByRole(role);
-    }
-
-    @Transactional(readOnly = true)
-    public List<AdminUser> getAdminUsersOrderedByInvoiceCount() {
-        return adminUserRepository.findAdminUsersOrderedByInvoiceCount();
-    }
-
-    @Transactional(readOnly = true)
-    public List<AdminUser> getAdminUsersOrderedByPaymentAmount() {
-        return adminUserRepository.findAdminUsersOrderedByPaymentAmount();
-    }
 }

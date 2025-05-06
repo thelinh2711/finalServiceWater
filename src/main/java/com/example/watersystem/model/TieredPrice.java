@@ -13,7 +13,7 @@ public class TieredPrice {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private int id;
 
     @Column(name = "minValue")
     private Integer minValue;

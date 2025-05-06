@@ -15,7 +15,7 @@ public class WaterServiceType {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private int id;
 
     @Column(name = "name", length = 255)
     private String name;

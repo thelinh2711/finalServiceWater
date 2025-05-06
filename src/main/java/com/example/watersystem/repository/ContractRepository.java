@@ -13,7 +13,8 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface ContractRepository extends JpaRepository<Contract, Long> {
+public interface ContractRepository extends JpaRepository<Contract, Integer> {
+    Contract findByApartmentId(int apartmentId);
 
     List<Contract> findByCustomer(Customer customer);
 

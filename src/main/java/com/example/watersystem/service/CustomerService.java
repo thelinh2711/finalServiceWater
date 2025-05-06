@@ -3,6 +3,7 @@ package com.example.watersystem.service;
 import com.example.watersystem.model.Customer;
 import com.example.watersystem.repository.CustomerRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -14,57 +15,27 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class CustomerService {
 
-    private final CustomerRepository customerRepository;
+    @Autowired
+    private CustomerRepository customerRepository;
 
-    @Transactional(readOnly = true)
     public List<Customer> getAllCustomers() {
         return customerRepository.findAll();
     }
 
-    @Transactional(readOnly = true)
-    public Optional<Customer> getCustomerById(Long id) {
-        return customerRepository.findById(id);
+    public Customer getCustomerById(int id) {
+        return customerRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy khách hàng với ID: " + id));
     }
 
-    @Transactional(readOnly = true)
-    public Optional<Customer> getCustomerByEmail(String email) {
-        return customerRepository.findByEmail(email);
-    }
+    public Customer updateCustomer(int id, Customer updatedCustomer) {
+        Customer customer = getCustomerById(id);
 
-    @Transactional(readOnly = true)
-    public List<Customer> searchCustomersByName(String name) {
-        return customerRepository.findByFullNameContaining(name);
-    }
+        // Cập nhật các trường
+        customer.setFullName(updatedCustomer.getFullName());
+        customer.setEmail(updatedCustomer.getEmail());
+        customer.setPhone(updatedCustomer.getPhone());
+        customer.setBirthDate(updatedCustomer.getBirthDate());
 
-    @Transactional
-    public Customer createCustomer(Customer customer) {
-        customer.setCreatedAt(LocalDate.now());
         return customerRepository.save(customer);
-    }
-
-    @Transactional
-    public Optional<Customer> updateCustomer(Long id, Customer customerDetails) {
-        return customerRepository.findById(id)
-                .map(customer -> {
-                    customer.setFullName(customerDetails.getFullName());
-                    customer.setPhone(customerDetails.getPhone());
-                    customer.setEmail(customerDetails.getEmail());
-                    customer.setBirthDate(customerDetails.getBirthDate());
-                    return customerRepository.save(customer);
-                });
-    }
-
-    @Transactional
-    public boolean deleteCustomer(Long id) {
-        return customerRepository.findById(id)
-                .map(customer -> {
-                    customerRepository.delete(customer);
-                    return true;
-                }).orElse(false);
-    }
-
-    @Transactional(readOnly = true)
-    public List<Customer> getCustomersWithMultipleContracts(int minContracts) {
-        return customerRepository.findCustomersWithMultipleContracts(minContracts);
     }
 }

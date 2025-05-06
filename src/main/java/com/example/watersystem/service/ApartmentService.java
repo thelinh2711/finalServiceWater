@@ -1,84 +1,47 @@
 package com.example.watersystem.service;
 
 import com.example.watersystem.model.Apartment;
+import com.example.watersystem.model.Contract;
 import com.example.watersystem.model.Customer;
 import com.example.watersystem.repository.ApartmentRepository;
 import com.example.watersystem.repository.CustomerRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
 public class ApartmentService {
 
-    private final ApartmentRepository apartmentRepository;
-    private final CustomerRepository customerRepository;
+    @Autowired
+    private ApartmentRepository apartmentRepository;
 
-    @Transactional(readOnly = true)
-    public List<Apartment> getAllApartments() {
-        return apartmentRepository.findAll();
+    @Autowired
+    private ContractService contractService;
+
+    public List<Apartment> getApartmentsByCustomerId(int customerId) {
+        return apartmentRepository.findByCustomerId(customerId);
     }
 
-    @Transactional(readOnly = true)
-    public Optional<Apartment> getApartmentById(Long id) {
-        return apartmentRepository.findById(id);
-    }
+    public List<Map<String, Object>> getApartmentsWithServiceTypeByCustomerId(int customerId) {
+        List<Apartment> apartments = getApartmentsByCustomerId(customerId);
+        List<Map<String, Object>> result = new ArrayList<>();
 
-    @Transactional(readOnly = true)
-    public List<Apartment> getApartmentsByCustomerId(Long customerId) {
-        return customerRepository.findById(customerId)
-                .map(apartmentRepository::findByCustomer)
-                .orElse(Collections.emptyList());
-    }
+        for (Apartment apartment : apartments) {
+            Map<String, Object> apartmentData = new HashMap<>();
+            apartmentData.put("apartment", apartment);
 
-    @Transactional(readOnly = true)
-    public List<Apartment> searchApartmentsByAddress(String address) {
-        return apartmentRepository.findByAddressContaining(address);
-    }
+            Contract contract = contractService.getContractByApartmentId(apartment.getId());
+            if (contract != null) {
+                apartmentData.put("serviceType", contract.getServiceType());
+            }
 
-    @Transactional
-    public Optional<Apartment> createApartment(Long customerId, Apartment apartment) {
-        return customerRepository.findById(customerId)
-                .map(customer -> {
-                    apartment.setCustomer(customer);
-                    return apartmentRepository.save(apartment);
-                });
-    }
+            result.add(apartmentData);
+        }
 
-    @Transactional
-    public Optional<Apartment> updateApartment(Long id, Apartment apartmentDetails) {
-        return apartmentRepository.findById(id)
-                .map(apartment -> {
-                    apartment.setAddress(apartmentDetails.getAddress());
-                    if (apartmentDetails.getCustomer() != null && apartmentDetails.getCustomer().getId() != null) {
-                        customerRepository.findById(apartmentDetails.getCustomer().getId())
-                                .ifPresent(apartment::setCustomer);
-                    }
-                    return apartmentRepository.save(apartment);
-                });
-    }
-
-    @Transactional
-    public boolean deleteApartment(Long id) {
-        return apartmentRepository.findById(id)
-                .map(apartment -> {
-                    apartmentRepository.delete(apartment);
-                    return true;
-                }).orElse(false);
-    }
-
-    @Transactional(readOnly = true)
-    public List<Apartment> getApartmentsWithActiveContracts() {
-        return apartmentRepository.findApartmentsWithActiveContracts();
-    }
-
-    @Transactional(readOnly = true)
-    public List<Apartment> getApartmentsWithoutContracts() {
-        return apartmentRepository.findApartmentsWithoutContracts();
+        return result;
     }
 }

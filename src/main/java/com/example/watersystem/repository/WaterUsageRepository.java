@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface WaterUsageRepository extends JpaRepository<WaterUsage, Long> {
+public interface WaterUsageRepository extends JpaRepository<WaterUsage, Integer> {
 
     List<WaterUsage> findByContract(Contract contract);
 

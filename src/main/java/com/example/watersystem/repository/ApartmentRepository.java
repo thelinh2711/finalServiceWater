@@ -9,7 +9,8 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-public interface ApartmentRepository extends JpaRepository<Apartment, Long> {
+public interface ApartmentRepository extends JpaRepository<Apartment, Integer> {
+    List<Apartment> findByCustomerId(int customerId);
 
     List<Apartment> findByCustomer(Customer customer);
 

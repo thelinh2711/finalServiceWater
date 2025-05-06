@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface WaterServiceTypeRepository extends JpaRepository<WaterServiceType, Long> {
+public interface WaterServiceTypeRepository extends JpaRepository<WaterServiceType, Integer> {
 
     Optional<WaterServiceType> findByName(String name);
 
