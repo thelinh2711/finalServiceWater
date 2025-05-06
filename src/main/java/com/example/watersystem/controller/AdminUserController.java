@@ -1,72 +1,154 @@
 package com.example.watersystem.controller;
 
+import org.springframework.ui.Model;
 import com.example.watersystem.model.AdminUser;
 import com.example.watersystem.service.AdminUserService;
-import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import jakarta.servlet.http.HttpSession;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
 
-@RestController
-@RequestMapping("/admin-users")
-@RequiredArgsConstructor
+@Controller
 public class AdminUserController {
 
     private final AdminUserService adminUserService;
 
-    @GetMapping
-    public ResponseEntity<List<AdminUser>> getAllAdminUsers() {
-        return ResponseEntity.ok(adminUserService.getAllAdminUsers());
+    @Autowired
+    public AdminUserController(AdminUserService adminUserService) {
+        this.adminUserService = adminUserService;
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<AdminUser> getAdminUserById(@PathVariable Long id) {
-        return adminUserService.getAdminUserById(id)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+    @GetMapping("/login")
+    public String showLoginPage() {
+        return "login"; // Trỏ đến templates/login.html
     }
 
-    @GetMapping("/username/{username}")
-    public ResponseEntity<AdminUser> getAdminUserByUsername(@PathVariable String username) {
-        return adminUserService.getAdminUserByUsername(username)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
-    }
+    @PostMapping("/login")
+    public String login(@RequestParam String username,
+                        @RequestParam String password,
+                        HttpSession session,
+                        Model model) {
 
-    @GetMapping("/role/{role}")
-    public ResponseEntity<List<AdminUser>> getAdminUsersByRole(@PathVariable String role) {
-        return ResponseEntity.ok(adminUserService.getAdminUsersByRole(role));
-    }
+        // Gọi service để xác thực
+        if (adminUserService.authenticate(username, password)) {
+            // Lấy thông tin admin
+            Optional<AdminUser> adminUserOpt = adminUserService.getAdminUserByUsername(username);
 
-    @PostMapping
-    public ResponseEntity<AdminUser> createAdminUser(@RequestBody AdminUser adminUser) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(adminUserService.createAdminUser(adminUser));
-    }
+            if (adminUserOpt.isPresent()) {
+                // Lưu thông tin vào session
+                session.setAttribute("adminUser", adminUserOpt.get());
 
-    @PutMapping("/{id}")
-    public ResponseEntity<AdminUser> updateAdminUser(@PathVariable Long id, @RequestBody AdminUser adminUser) {
-        return adminUserService.updateAdminUser(id, adminUser)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
-    }
-
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteAdminUser(@PathVariable Long id) {
-        if (adminUserService.deleteAdminUser(id)) {
-            return ResponseEntity.noContent().build();
+                // Chuyển hướng đến trang chủ
+                return "redirect:/home";
+            }
         }
-        return ResponseEntity.notFound().build();
+
+        // Đăng nhập thất bại, quay lại trang đăng nhập với thông báo lỗi
+        model.addAttribute("error", "Tên đăng nhập hoặc mật khẩu không đúng");
+        return "login";
     }
 
-    @GetMapping("/by-invoice-count")
-    public ResponseEntity<List<AdminUser>> getAdminUsersOrderedByInvoiceCount() {
-        return ResponseEntity.ok(adminUserService.getAdminUsersOrderedByInvoiceCount());
+    @GetMapping("/home")
+    public String showHomePage(HttpSession session, Model model) {
+        // Kiểm tra xem đã đăng nhập chưa
+        AdminUser adminUser = (AdminUser) session.getAttribute("adminUser");
+
+        if (adminUser == null) {
+            // Chưa đăng nhập, chuyển hướng về trang đăng nhập
+            return "redirect:/login";
+        }
+
+        // Đã đăng nhập, truyền thông tin admin vào model
+        model.addAttribute("admin", adminUser);
+
+        return "home"; // Trỏ đến templates/home.html
     }
 
-    @GetMapping("/by-payment-amount")
-    public ResponseEntity<List<AdminUser>> getAdminUsersOrderedByPaymentAmount() {
-        return ResponseEntity.ok(adminUserService.getAdminUsersOrderedByPaymentAmount());
+    @GetMapping("/logout")
+    public String logout(HttpSession session) {
+        // Xóa thông tin phiên
+        session.invalidate();
+
+        // Chuyển hướng về trang đăng nhập
+        return "redirect:/login";
+    }
+
+    @GetMapping("/users")
+    public String getAllAdminUsers(Model model) {
+        List<AdminUser> adminUsers = adminUserService.getAllAdminUsers();
+        model.addAttribute("adminUsers", adminUsers);
+        return "users"; // Nếu bạn có trang users.html trong thư mục templates
+    }
+
+    @GetMapping("/users/{id}")
+    public String getAdminUserById(@PathVariable Long id, Model model) {
+        Optional<AdminUser> adminUser = adminUserService.getAdminUserById(id);
+        if (adminUser.isPresent()) {
+            model.addAttribute("adminUser", adminUser.get());
+            return "user-details"; // Nếu bạn có trang user-details.html
+        } else {
+            model.addAttribute("error", "Không tìm thấy người dùng");
+            return "error"; // Nếu bạn có trang error.html
+        }
+    }
+
+    @GetMapping("/users/new")
+    public String showNewUserForm(Model model) {
+        model.addAttribute("adminUser", new AdminUser());
+        return "user-form"; // Nếu bạn có trang user-form.html
+    }
+
+    @PostMapping("/users/save")
+    public String saveAdminUser(@ModelAttribute AdminUser adminUser, Model model) {
+        try {
+            adminUserService.createAdminUser(adminUser);
+            return "redirect:/admin/users";
+        } catch (Exception e) {
+            model.addAttribute("error", e.getMessage());
+            model.addAttribute("adminUser", adminUser);
+            return "user-form"; // Nếu bạn có trang user-form.html
+        }
+    }
+
+    @GetMapping("/users/edit/{id}")
+    public String showEditUserForm(@PathVariable Long id, Model model) {
+        Optional<AdminUser> adminUser = adminUserService.getAdminUserById(id);
+        if (adminUser.isPresent()) {
+            model.addAttribute("adminUser", adminUser.get());
+            return "user-form"; // Nếu bạn có trang user-form.html
+        } else {
+            model.addAttribute("error", "Không tìm thấy người dùng");
+            return "error"; // Nếu bạn có trang error.html
+        }
+    }
+
+    @PostMapping("/users/update/{id}")
+    public String updateAdminUser(@PathVariable Long id, @ModelAttribute AdminUser adminUser, Model model) {
+        try {
+            Optional<AdminUser> updated = adminUserService.updateAdminUser(id, adminUser);
+            if (updated.isPresent()) {
+                return "redirect:/admin/users";
+            } else {
+                model.addAttribute("error", "Không tìm thấy người dùng");
+                return "error"; // Nếu bạn có trang error.html
+            }
+        } catch (Exception e) {
+            model.addAttribute("error", e.getMessage());
+            model.addAttribute("adminUser", adminUser);
+            return "user-form"; // Nếu bạn có trang user-form.html
+        }
+    }
+
+    @GetMapping("/users/delete/{id}")
+    public String deleteAdminUser(@PathVariable Long id, Model model) {
+        boolean deleted = adminUserService.deleteAdminUser(id);
+        if (!deleted) {
+            model.addAttribute("error", "Không tìm thấy người dùng");
+            return "error"; // Nếu bạn có trang error.html
+        }
+        return "redirect:/admin/users";
     }
 }

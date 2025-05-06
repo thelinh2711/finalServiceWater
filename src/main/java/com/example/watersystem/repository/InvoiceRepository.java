@@ -27,9 +27,9 @@ public interface InvoiceRepository extends JpaRepository<Invoice, Long> {
     @Query("SELECT i FROM Invoice i WHERE i.status = 'CHUA_THANH_TOAN' AND i.createdAt < :date")
     List<Invoice> findOverdueInvoices(LocalDate date);
 
-    @Query("SELECT i.createdAt, SUM(i.totalAmount) FROM Invoice i GROUP BY i.createdAt ORDER BY i.createdAt")
+    @Query("SELECT FUNCTION('DATE_FORMAT', i.createdAt, '%Y-%m-%d') as day, SUM(i.totalAmount) FROM Invoice i GROUP BY day ORDER BY day")
     List<Object[]> findDailyRevenue();
 
-    @Query("SELECT SUBSTRING(i.createdAt, 1, 7), SUM(i.totalAmount) FROM Invoice i GROUP BY SUBSTRING(i.createdAt, 1, 7) ORDER BY SUBSTRING(i.createdAt, 1, 7)")
+    @Query("SELECT FUNCTION('DATE_FORMAT', i.createdAt, '%Y-%m') as month, SUM(i.totalAmount) FROM Invoice i GROUP BY month ORDER BY month")
     List<Object[]> findMonthlyRevenue();
 }

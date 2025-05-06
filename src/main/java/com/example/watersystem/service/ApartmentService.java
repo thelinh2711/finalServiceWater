@@ -38,7 +38,7 @@ public class ApartmentService {
 
     @Transactional(readOnly = true)
     public List<Apartment> searchApartmentsByAddress(String address) {
-        return apartmentRepository.findByAdressContaining(address);
+        return apartmentRepository.findByAddressContaining(address);
     }
 
     @Transactional

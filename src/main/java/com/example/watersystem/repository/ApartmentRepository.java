@@ -13,7 +13,7 @@ public interface ApartmentRepository extends JpaRepository<Apartment, Long> {
 
     List<Apartment> findByCustomer(Customer customer);
 
-    List<Apartment> findByAdressContaining(String adressKeyword);
+    List<Apartment> findByAddressContaining(String addressKeyword);
 
     @Query("SELECT a FROM Apartment a JOIN a.contracts c GROUP BY a HAVING COUNT(c) > 0")
     List<Apartment> findApartmentsWithActiveContracts();

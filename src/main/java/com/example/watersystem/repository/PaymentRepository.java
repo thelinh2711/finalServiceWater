@@ -22,10 +22,10 @@ public interface PaymentRepository extends JpaRepository<Payment, Long> {
 
     List<Payment> findByAmountGreaterThan(BigDecimal amount);
 
-    @Query("SELECT p.paidDate, SUM(p.amount) FROM Payment p GROUP BY p.paidDate ORDER BY p.paidDate")
+    @Query("SELECT FUNCTION('DATE_FORMAT', p.paidDate, '%Y-%m-%d') as day, SUM(p.amount) FROM Payment p GROUP BY day ORDER BY day")
     List<Object[]> findDailyPayments();
 
-    @Query("SELECT SUBSTRING(p.paidDate, 1, 7), SUM(p.amount) FROM Payment p GROUP BY SUBSTRING(p.paidDate, 1, 7) ORDER BY SUBSTRING(p.paidDate, 1, 7)")
+    @Query("SELECT FUNCTION('DATE_FORMAT', p.paidDate, '%Y-%m') as month, SUM(p.amount) FROM Payment p GROUP BY month ORDER BY month")
     List<Object[]> findMonthlyPayments();
 
     @Query("SELECT p FROM Payment p WHERE p.amount > (SELECT AVG(p2.amount) FROM Payment p2)")

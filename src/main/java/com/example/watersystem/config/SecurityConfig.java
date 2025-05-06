@@ -12,6 +12,7 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
+import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import java.util.Arrays;
@@ -21,19 +22,17 @@ import java.util.Arrays;
 public class SecurityConfig {
 
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-                .cors(cors -> cors.configurationSource(corsConfigurationSource())) // Sử dụng cấu hình CORS chi tiết
-                .csrf(AbstractHttpConfigurer::disable) // Tắt CSRF để dễ gọi API từ front-end
+                .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/admin/login", "/css/**", "/js/**", "/api/**").permitAll()
-                        .anyRequest().authenticated() // Các request khác yêu cầu xác thực
+                        // Cho phép truy cập tất cả các đường dẫn mà không cần xác thực
+                        .anyRequest().permitAll()
                 )
-                .formLogin(form -> form
-                        .loginPage("/admin/login") // Trang đăng nhập tùy chỉnh
-                        .defaultSuccessUrl("/admin/home")
-                        .permitAll()
-                );
+                // Vô hiệu hóa form đăng nhập mặc định
+                .formLogin(form -> form.disable())
+                // Vô hiệu hóa HTTP Basic authentication
+                .httpBasic(basic -> basic.disable());
 
         return http.build();
     }
@@ -57,18 +56,20 @@ public class SecurityConfig {
         return source;
     }
 
-    // Cấu hình CORS cho Spring MVC
-    @Bean
-    public WebMvcConfigurer corsConfigurer() {
-        return new WebMvcConfigurer() {
-            @Override
-            public void addCorsMappings(CorsRegistry registry) {
-                registry.addMapping("/**")
-                        .allowedOrigins("*")
-                        .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH")
-                        .allowedHeaders("*")
-                        .maxAge(3600);
-            }
-        };
+    @Configuration
+    public class WebMvcConfig implements WebMvcConfigurer {
+
+        @Override
+        public void addResourceHandlers(ResourceHandlerRegistry registry) {
+            // Đảm bảo tài nguyên CSS được phục vụ chính xác
+            registry.addResourceHandler("/css/**")
+                    .addResourceLocations("classpath:/static/css/");
+
+            registry.addResourceHandler("/js/**")
+                    .addResourceLocations("classpath:/static/js/");
+
+            registry.addResourceHandler("/images/**")
+                    .addResourceLocations("classpath:/static/images/");
+        }
     }
 }
