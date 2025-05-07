@@ -58,28 +58,6 @@ public class CustomerController {
         Customer customer = customerService.getCustomerById(id);
         model.addAttribute("customer", customer);
 
-        // Lấy danh sách căn hộ
-        List<Apartment> apartments = apartmentService.getApartmentsByCustomerId(id);
-        List<Map<String, Object>> apartmentsWithService = new ArrayList<>();
-
-        for (Apartment apartment : apartments) {
-            Map<String, Object> apartmentData = new HashMap<>();
-            apartmentData.put("apartment", apartment);
-
-            Contract contract = contractService.getContractByApartmentId(apartment.getId());
-            if (contract != null && contract.getServiceType() != null) {
-                apartmentData.put("serviceType", contract.getServiceType().getName());
-                apartmentData.put("note", contract.getServiceType().getNote());
-            } else {
-                apartmentData.put("serviceType", "Chưa có dịch vụ");
-                apartmentData.put("note", "");
-            }
-
-            apartmentsWithService.add(apartmentData);
-        }
-
-        model.addAttribute("apartments", apartmentsWithService);
-
         return "customerDetail";
     }
 
