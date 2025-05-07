@@ -95,6 +95,6 @@ public class CustomerController {
         redirectAttributes.addFlashAttribute("successMessage", "Cập nhật thông tin khách hàng thành công");
 
         // Bước 82: Chuyển về trang chi tiết
-        return "redirect:/customers/" + id;
+        return "redirect:/customerDetail/" + id;
     }
 }
