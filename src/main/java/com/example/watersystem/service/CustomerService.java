@@ -45,4 +45,8 @@ public class CustomerService {
         // Bước 77-79: Lưu thay đổi vào DB
         return customerRepository.save(existingCustomer);
     }
+
+    public void saveCustomer(Customer customer) {
+        customerRepository.save(customer);
+    }
 }

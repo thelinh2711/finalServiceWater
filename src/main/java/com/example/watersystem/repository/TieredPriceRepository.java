@@ -11,14 +11,6 @@ import java.util.Optional;
 
 @Repository
 public interface TieredPriceRepository extends JpaRepository<TieredPrice, Integer> {
-
     List<TieredPrice> findByServiceType(WaterServiceType serviceType);
-
-    List<TieredPrice> findByPricePerM3LessThanEqual(Integer maxPrice);
-
-    @Query("SELECT tp FROM TieredPrice tp WHERE :usage BETWEEN tp.minValue AND tp.maxValue AND tp.serviceType.id = :serviceTypeId")
-    Optional<TieredPrice> findApplicableTierForUsage(Integer usage, Long serviceTypeId);
-
-    @Query("SELECT tp FROM TieredPrice tp WHERE tp.serviceType.id = :serviceTypeId ORDER BY tp.minValue ASC")
-    List<TieredPrice> findTiersByServiceTypeOrdered(Long serviceTypeId);
+    List<TieredPrice> findByServiceTypeId(Integer serviceTypeId);
 }

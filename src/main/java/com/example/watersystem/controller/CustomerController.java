@@ -97,4 +97,29 @@ public class CustomerController {
         // Bước 82: Chuyển về trang chi tiết
         return "redirect:/customerDetail/" + id;
     }
+
+    // Hiển thị form thêm khách hàng
+    @GetMapping("/customers/add")
+    public String showAddCustomerForm(Model model, HttpSession session) {
+        if (session.getAttribute("adminUser") == null) {
+            return "redirect:/login";
+        }
+
+        model.addAttribute("customer", new Customer());
+        return "addCustomer"; // Giao diện addCustomer.html
+    }
+
+    // Xử lý thêm khách hàng mới
+    @PostMapping("/customers/add")
+    public String addCustomer(@ModelAttribute Customer customer,
+                              RedirectAttributes redirectAttributes,
+                              HttpSession session) {
+        if (session.getAttribute("adminUser") == null) {
+            return "redirect:/login";
+        }
+
+        customerService.saveCustomer(customer);
+        redirectAttributes.addFlashAttribute("successMessage", "Thêm khách hàng mới thành công");
+        return "redirect:/customers";
+    }
 }

@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>Nhập chỉ số nước</title>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+  <style>
+    .form-box {
+        max-width: 500px;
+        margin: 40px auto;
+        padding: 30px;
+        border: 1px solid #dee2e6;
+        border-radius: 8px;
+        background-color: #f8f9fa;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+    .form-header {
+        font-size: 1.5rem;
+        font-weight: bold;
+        color: #007bff;
+        text-align: center;
+        margin-bottom: 25px;
+    }
+    .form-label {
+        font-weight: 500;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <div class="form-box">
+    <div class="form-header">Nhập chỉ số nước</div>
+    <form th:action="@{/water-usage/create}" method="post">
+      <input type="hidden" name="contractId" th:value="${contractId}" />
+
+      <div class="form-group">
+        <label class="form-label">Địa chỉ</label>
+        <input type="text" class="form-control" th:value="${address}" readonly>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Chủ sở hữu</label>
+        <input type="text" class="form-control" th:value="${owner}" readonly>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Dịch vụ</label>
+        <input type="text" class="form-control" th:value="${service}" readonly>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Thời gian</label>
+        <input type="month" class="form-control" name="month" required>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Chỉ số cũ</label>
+        <input type="number" class="form-control" th:value="${previousIndex}" readonly>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Chỉ số mới</label>
+        <input type="number" class="form-control" name="currentIndex" required>
+      </div>
+
+      <button type="submit" class="btn btn-primary btn-block">Tạo hóa đơn</button>
+    </form>
+  </div>
+</div>
+
+</body>
+</html>

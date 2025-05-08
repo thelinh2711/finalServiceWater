@@ -17,20 +17,6 @@ import java.util.Optional;
 public interface ContractRepository extends JpaRepository<Contract, Integer> {
     @Query("SELECT c FROM Contract c WHERE c.apartment.id = :apartmentId")
     Contract findByApartmentId(@Param("apartmentId") int apartmentId);
+    List<Contract> findByActiveTrue();
 
-    List<Contract> findByCustomer(Customer customer);
-
-    List<Contract> findByApartment(Apartment apartment);
-
-    List<Contract> findByServiceType(WaterServiceType serviceType);
-
-    List<Contract> findBySignedDateBetween(LocalDate start, LocalDate end);
-
-    @Query("SELECT c FROM Contract c WHERE c.signedDate <= :date AND (SELECT COUNT(wu) FROM WaterUsage wu WHERE wu.contract = c) = 0")
-    List<Contract> findContractsWithoutWaterUsage(LocalDate date);
-
-    @Query("SELECT c FROM Contract c JOIN c.waterUsages wu GROUP BY c ORDER BY COUNT(wu) DESC")
-    List<Contract> findContractsOrderedByWaterUsageCount();
-
-    Optional<Contract> findByApartmentAndServiceTypeAndSignedDateLessThanEqual(Apartment apartment, WaterServiceType serviceType, LocalDate currentDate);
 }

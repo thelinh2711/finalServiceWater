@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>Danh sách căn hộ</title>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css">
+  <style>
+    .table-container {
+      margin-top: 50px;
+      padding: 20px;
+      background: #fff;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+
+    .table thead {
+      background-color: #007bff;
+      color: white;
+    }
+
+    .btn-icon {
+      font-size: 1.2rem;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container table-container">
+  <h4 class="text-center text-primary mb-4">Danh sách căn hộ</h4>
+
+  <table class="table table-bordered table-hover text-center">
+    <thead>
+    <tr>
+      <th>Địa chỉ</th>
+      <th>Chủ sở hữu</th>
+      <th>Dịch vụ</th>
+      <th>Nhập số</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="contract : ${contracts}">
+      <td th:text="${contract.apartment.address}">Địa chỉ</td>
+      <td th:text="${contract.customer.fullName}">Chủ hộ</td>
+      <td th:text="${contract.serviceType.name}">Tên dịch vụ</td>
+      <td>
+        <a th:href="@{/water-usage/input(apartmentId=${contract.apartment.id})}" class="btn btn-outline-primary btn-sm">
+          <i class="fas fa-edit btn-icon"></i>
+        </a>
+      </td>
+    </tr>
+    </tbody>
+  </table>
+</div>
+
+</body>
+</html>

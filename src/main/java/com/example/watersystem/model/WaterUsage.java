@@ -24,6 +24,9 @@ public class WaterUsage {
     @Column(name = "currentIndex")
     private Integer currentIndex;
 
+    @Column(name = "usedIndex")
+    private int usedIndex;
+
     @ManyToOne
     @JoinColumn(name = "tblContractId")
     private Contract contract;

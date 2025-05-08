@@ -24,7 +24,17 @@ public class ContractService {
     @Autowired
     private ContractRepository contractRepository;
 
+    // Bước 3, 5, 12 – Lấy tất cả hợp đồng đang hoạt động
+    public List<Contract> getAllActiveContracts() {
+        return contractRepository.findByActiveTrue();
+    }
+
     public Contract getContractByApartmentId(Integer apartmentId) {
         return contractRepository.findByApartmentId(apartmentId);
+    }
+    // Bước 48 – Lấy hợp đồng theo ID
+    public Contract getById(Integer id) {
+        return contractRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy hợp đồng với ID: " + id));
     }
 }

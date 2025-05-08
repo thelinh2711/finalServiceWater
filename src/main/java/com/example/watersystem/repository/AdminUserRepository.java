@@ -13,13 +13,4 @@ public interface AdminUserRepository extends JpaRepository<AdminUser, Integer> {
 
     Optional<AdminUser> findByUsername(String username);
 
-    Optional<AdminUser> findByEmail(String email);
-
-    List<AdminUser> findByRole(String role);
-
-    @Query("SELECT a FROM AdminUser a JOIN a.invoices i GROUP BY a ORDER BY COUNT(i) DESC")
-    List<AdminUser> findAdminUsersOrderedByInvoiceCount();
-
-    @Query("SELECT a FROM AdminUser a JOIN a.payments p GROUP BY a ORDER BY SUM(p.amount) DESC")
-    List<AdminUser> findAdminUsersOrderedByPaymentAmount();
 }

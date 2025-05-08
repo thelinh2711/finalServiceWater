@@ -35,4 +35,8 @@ public class Contract {
 
     @OneToMany(mappedBy = "contract")
     private List<WaterUsage> waterUsages;
+
+    @Builder.Default
+    @Column(name = "active")
+    private Boolean active = true;
 }

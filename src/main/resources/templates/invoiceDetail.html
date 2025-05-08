@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>Chi tiết hóa đơn</title>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+  <style>
+    body {
+      background-color: #eef2f7;
+      font-family: 'Segoe UI', sans-serif;
+    }
+
+    .invoice-card {
+      background-color: #ffffff;
+      border-radius: 15px;
+      padding: 30px;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+    }
+
+    .section-title {
+      background-color: #343a40;
+      color: white;
+      padding: 12px 0;
+      border-radius: 8px;
+      font-size: 24px;
+      font-weight: bold;
+      text-transform: uppercase;
+    }
+
+    .info-table td {
+      padding: 10px 5px;
+      vertical-align: middle;
+      font-size: 16px;
+    }
+
+    .summary-table th {
+      background-color: #007bff;
+      color: white;
+      font-size: 16px;
+    }
+
+    .summary-table td {
+      font-size: 15px;
+    }
+
+    .total-row td {
+      font-weight: bold;
+      font-size: 18px;
+      color: #dc3545;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container mt-5 mb-5">
+  <div class="invoice-card">
+    <div class="section-title text-center">Hóa đơn chi tiết</div>
+
+    <!-- Thông tin chính -->
+    <table class="table table-borderless info-table">
+      <tr>
+        <td><strong>Địa chỉ:</strong></td>
+        <td th:text="${invoice.waterUsage.contract.apartment.address}">Địa chỉ</td>
+      </tr>
+      <tr>
+        <td><strong>Chủ sở hữu:</strong></td>
+        <td th:text="${invoice.waterUsage.contract.customer.fullName}">Tên chủ hộ</td>
+      </tr>
+      <tr>
+        <td><strong>Dịch vụ:</strong></td>
+        <td th:text="${invoice.waterUsage.contract.serviceType.name}">Tên dịch vụ</td>
+      </tr>
+      <tr>
+        <td><strong>Thời gian:</strong></td>
+        <td th:text="${invoice.waterUsage.month}">Tháng/Năm</td>
+      </tr>
+      <tr>
+        <td><strong>Chỉ số cũ:</strong></td>
+        <td th:text="${invoice.waterUsage.previousIndex}">0</td>
+      </tr>
+      <tr>
+        <td><strong>Chỉ số mới:</strong></td>
+        <td th:text="${invoice.waterUsage.currentIndex}">0</td>
+      </tr>
+      <tr>
+        <td><strong>Số nước sử dụng:</strong></td>
+        <td th:text="${invoice.waterUsage.usedIndex} + ' m³'">0 m³</td>
+      </tr>
+    </table>
+
+    <!-- Chi tiết bậc giá -->
+    <h5 class="mt-4 mb-3 text-primary">Chi tiết tính tiền</h5>
+    <table class="table table-striped summary-table">
+      <thead>
+      <tr>
+        <th>Bậc giá</th>
+        <th>Đơn giá (VNĐ)</th>
+        <th>Thành tiền (VNĐ)</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr th:each="tier : ${tiers}">
+        <td th:text="${tier.range}">0 - 10 m³</td>
+        <td th:text="${tier.unitPrice}">0</td>
+        <td th:text="${tier.subtotal}">0</td>
+      </tr>
+      </tbody>
+    </table>
+
+    <!-- Tổng kết -->
+    <table class="table table-borderless info-table mt-4">
+      <tr class="total-row">
+        <td><strong>Tổng tiền:</strong></td>
+        <td th:text="${invoice.totalAmount} + ' VNĐ'">0 VNĐ</td>
+      </tr>
+      <tr>
+        <td><strong>Trạng thái:</strong></td>
+        <td th:text="${invoice.status}">Chưa thanh toán</td>
+      </tr>
+      <tr>
+        <td><strong>Nhân viên:</strong></td>
+        <td>Hệ thống tự động</td>
+      </tr>
+    </table>
+  </div>
+</div>
+
+</body>
+</html>

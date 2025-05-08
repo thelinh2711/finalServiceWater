@@ -52,21 +52,6 @@ public class AdminUserService {
     public Optional<AdminUser> getAdminUserByUsername(String username) {
         return adminUserRepository.findByUsername(username);
     }
-    @Transactional(readOnly = true)
-    public List<AdminUser> getAllAdminUsers() {
-        return adminUserRepository.findAll();
-    }
-
-    @Transactional(readOnly = true)
-    public Optional<AdminUser> getAdminUserById(Integer id) {
-        return adminUserRepository.findById(id);
-    }
-
-    @Transactional
-    public AdminUser createAdminUser(AdminUser adminUser) {
-        adminUser.setPassword(passwordEncoder.encode(adminUser.getPassword()));
-        return adminUserRepository.save(adminUser);
-    }
 
 
 }
