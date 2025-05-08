@@ -58,7 +58,6 @@ public class InvoiceService {
             int pricePerM3 = tier.getPricePerM3();
 
             int tierUsage;
-
             if (maxObj == null) {
                 // Bậc cuối: không giới hạn
                 tierUsage = remainingUsage;
@@ -68,7 +67,11 @@ public class InvoiceService {
                 if (min == 0) {
                     tierUsage = Math.min(remainingUsage, max);
                 } else {
-                    tierUsage = Math.min(remainingUsage, max - min + 1);
+                    if(remainingUsage<=max-min+1){
+                        tierUsage = remainingUsage;
+                    } else {
+                        tierUsage = max - min + 1;
+                    }
                 }
             }
 
@@ -87,7 +90,7 @@ public class InvoiceService {
     public List<Map<String, Object>> buildTieredPriceViewList(Invoice invoice) {
         List<TieredPrice> tiers = getTieredPricesForInvoice(invoice);
         int used = invoice.getWaterUsage().getUsedIndex();
-        int remaining = used;
+        int remainingUsage = used;
 
         List<Map<String, Object>> result = new ArrayList<>();
 
@@ -98,12 +101,21 @@ public class InvoiceService {
             int tierUsage;
 
             if (maxObj == null) {
-                tierUsage = remaining;
+                // Bậc cuối: không giới hạn
+                tierUsage = remainingUsage;
             } else {
                 int max = maxObj;
-                tierUsage = Math.min(remaining, max - min + 1);
+                // Tính đúng lượng nước thuộc bậc này
+                if (min == 0) {
+                    tierUsage = Math.min(remainingUsage, max);
+                } else {
+                    if(remainingUsage<=max-min+1){
+                        tierUsage = remainingUsage;
+                    } else {
+                        tierUsage = max - min + 1;
+                    }
+                }
             }
-
             if (tierUsage > 0) {
                 Map<String, Object> row = new HashMap<>();
                 String range = (maxObj == null)
@@ -116,10 +128,10 @@ public class InvoiceService {
                 row.put("subtotal", subtotal);
 
                 result.add(row);
-                remaining -= tierUsage;
+                remainingUsage -= tierUsage;
             }
 
-            if (remaining <= 0) break;
+            if (remainingUsage <= 0) break;
         }
 
         return result;
