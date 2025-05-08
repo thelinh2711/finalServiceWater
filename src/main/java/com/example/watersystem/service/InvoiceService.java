@@ -7,7 +7,10 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -80,5 +83,45 @@ public class InvoiceService {
         }
 
         return total;
+    }
+    public List<Map<String, Object>> buildTieredPriceViewList(Invoice invoice) {
+        List<TieredPrice> tiers = getTieredPricesForInvoice(invoice);
+        int used = invoice.getWaterUsage().getUsedIndex();
+        int remaining = used;
+
+        List<Map<String, Object>> result = new ArrayList<>();
+
+        for (TieredPrice tier : tiers) {
+            int min = tier.getMinValue();
+            Integer maxObj = tier.getMaxValue();
+            int pricePerM3 = tier.getPricePerM3();
+            int tierUsage;
+
+            if (maxObj == null) {
+                tierUsage = remaining;
+            } else {
+                int max = maxObj;
+                tierUsage = Math.min(remaining, max - min + 1);
+            }
+
+            if (tierUsage > 0) {
+                Map<String, Object> row = new HashMap<>();
+                String range = (maxObj == null)
+                        ? min + "+ m³"
+                        : min + " - " + maxObj + " m³";
+                int subtotal = tierUsage * pricePerM3;
+
+                row.put("range", range);
+                row.put("unitPrice", pricePerM3);
+                row.put("subtotal", subtotal);
+
+                result.add(row);
+                remaining -= tierUsage;
+            }
+
+            if (remaining <= 0) break;
+        }
+
+        return result;
     }
 }

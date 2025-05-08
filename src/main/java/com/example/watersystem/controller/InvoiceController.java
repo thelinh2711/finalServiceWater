@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 
 @Controller
 @RequestMapping("/invoices")
@@ -32,7 +33,7 @@ public class InvoiceController {
     @GetMapping("/detail")
     public String showInvoiceDetail(@RequestParam("invoiceId") Integer invoiceId, Model model) {
         Invoice invoice = invoiceService.getById(invoiceId);
-        List<TieredPrice> tieredPrices = invoiceService.getTieredPricesForInvoice(invoice);
+        List<Map<String, Object>> tieredPrices = invoiceService.buildTieredPriceViewList(invoice);
         model.addAttribute("invoice", invoice);
         model.addAttribute("tieredPrices", tieredPrices);
         return "invoiceDetail";

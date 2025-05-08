@@ -99,7 +99,7 @@
       </tr>
       </thead>
       <tbody>
-      <tr th:each="tier : ${tiers}">
+      <tr th:each="tier : ${tieredPrices}">
         <td th:text="${tier.range}">0 - 10 m³</td>
         <td th:text="${tier.unitPrice}">0</td>
         <td th:text="${tier.subtotal}">0</td>
