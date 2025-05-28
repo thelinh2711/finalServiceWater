@@ -22,10 +22,14 @@ public class ApartmentService {
     @Autowired
     private ContractService contractService;
 
+    public Apartment getById(Integer apartmentId) {
+        return apartmentRepository.findById(apartmentId)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy căn hộ với ID: " + apartmentId));
+    }
+
     // Bước 46: ApartmentService thực hiện phương thức getApartmentsByCustomerId(customerId)
-    public List<Apartment> getApartmentsByCustomerId(int customerId) {
-        // Bước 47-51: Gọi repository để lấy danh sách căn hộ
-        return apartmentRepository.findByCustomerId(customerId);
+    public List<Apartment> getApartmentsByCustomer(Customer customer) {
+        return apartmentRepository.findByCustomerId(customer.getId());
     }
 
 }

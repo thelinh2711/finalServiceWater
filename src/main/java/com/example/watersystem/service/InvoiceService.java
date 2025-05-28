@@ -7,10 +7,7 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -18,26 +15,48 @@ public class InvoiceService {
     private final InvoiceRepository invoiceRepository;
     private final WaterUsageRepository waterUsageRepository;
     private final TieredPriceRepository tieredPriceRepository;
+    private final ContractService contractService;
 
     public Invoice getById(Integer id) {
         return invoiceRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Invoice not found"));
+                  .orElseThrow(() -> new RuntimeException("Invoice not found"));
     }
     public List<TieredPrice> getTieredPricesForInvoice(Invoice invoice) {
         WaterServiceType serviceType = invoice.getWaterUsage().getContract().getServiceType();
         return tieredPriceRepository.findByServiceType(serviceType);
     }
 
-    public Invoice generateInvoice(int waterUsageId) {
-        WaterUsage usage = waterUsageRepository.findById(waterUsageId)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy chỉ số nước"));
+    public Invoice createInvoiceFromUsage(WaterUsage usage) {
+        Contract contract = usage.getContract();
+        String month = usage.getMonth();
 
-        int usedIndex = usage.getUsedIndex();
-        int serviceTypeId = usage.getContract().getServiceType().getId();
+        // ✅ Kiểm tra đã tồn tại usage cùng tháng cho hợp đồng này
+        Optional<WaterUsage> existing = waterUsageRepository
+                .findByContractIdAndMonth(contract.getId(), month);
 
-        List<TieredPrice> tierList = tieredPriceRepository.findByServiceTypeId(serviceTypeId);
-        BigDecimal totalAmount = applyTieredPricing(usedIndex, tierList);
+        if (existing.isPresent()) {
+            throw new RuntimeException("Tháng này đã được tạo hóa đơn.");
+        }
 
+        // ✅ Tìm chỉ số trước đó (nếu có)
+        WaterUsage last = waterUsageRepository
+                .findTopByContractIdOrderByMonthDesc(contract.getId())
+                .orElse(null);
+
+        int previous = (last != null) ? last.getCurrentIndex() : 0;
+        int current = usage.getCurrentIndex();
+        int used = current - previous;
+
+        usage.setPreviousIndex(previous);
+        usage.setUsedIndex(used);
+
+        // ✅ Tính tiền nước theo bậc giá
+        List<TieredPrice> tierList = tieredPriceRepository.findByServiceTypeId(
+                contract.getServiceType().getId()
+        );
+        BigDecimal totalAmount = applyTieredPricing(used, tierList);
+
+        // ✅ Tạo hóa đơn gắn với usage
         Invoice invoice = Invoice.builder()
                 .waterUsage(usage)
                 .totalAmount(totalAmount)
@@ -47,6 +66,7 @@ public class InvoiceService {
 
         return invoiceRepository.save(invoice);
     }
+
 
     private BigDecimal applyTieredPricing(int used, List<TieredPrice> tiers) {
         BigDecimal total = BigDecimal.ZERO;

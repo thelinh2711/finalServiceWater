@@ -130,8 +130,8 @@
       <td th:text="${#temporals.format(customer.birthDate, 'dd/MM/yyyy')}"></td>
       <td>
         <a th:href="@{/customerDetail/{id}(id=${customer.id})}" class="btn btn-info btn-sm">Chi tiết</a>
-        <a th:href="@{/customers/delete/{id}(id=${customer.id})}" class="btn btn-danger btn-sm"
-           onclick="return confirm('Bạn có chắc muốn xóa khách hàng này?')">Xóa</a>
+<!--        <a th:href="@{/customers/delete/{id}(id=${customer.id})}" class="btn btn-danger btn-sm"-->
+<!--           onclick="return confirm('Bạn có chắc muốn xóa khách hàng này?')">Xóa</a>-->
       </td>
     </tr>
     </tbody>

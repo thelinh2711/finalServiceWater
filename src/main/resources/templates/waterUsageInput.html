@@ -6,23 +6,48 @@
   <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
   <style>
     .form-box {
-        max-width: 500px;
-        margin: 40px auto;
-        padding: 30px;
-        border: 1px solid #dee2e6;
-        border-radius: 8px;
-        background-color: #f8f9fa;
-        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      max-width: 550px;
+      margin: 40px auto;
+      padding: 30px;
+      border: 1px solid #dee2e6;
+      border-radius: 8px;
+      background-color: #f8f9fa;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
     }
     .form-header {
-        font-size: 1.5rem;
-        font-weight: bold;
-        color: #007bff;
-        text-align: center;
-        margin-bottom: 25px;
+      font-size: 1.6rem;
+      font-weight: bold;
+      color: #007bff;
+      text-align: center;
+      margin-bottom: 25px;
     }
     .form-label {
-        font-weight: 500;
+      font-weight: 500;
+    }
+    .form-group select:disabled {
+      background-color: #e9ecef;
+    }
+
+    /* Custom styles cho month picker */
+    .month-picker {
+      position: relative;
+    }
+
+    .month-input {
+      cursor: pointer;
+      background-color: white;
+    }
+
+    .month-input:focus {
+      box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+    }
+
+    /* Ẩn các tháng đã sử dụng */
+    .disabled-month {
+      background-color: #f8f9fa !important;
+      color: #6c757d !important;
+      cursor: not-allowed !important;
+      text-decoration: line-through;
     }
   </style>
 </head>
@@ -30,28 +55,44 @@
 
 <div class="container">
   <div class="form-box">
+
+    <!-- 🔴 THÔNG BÁO LỖI -->
+    <div th:if="${errorMessage}" class="alert alert-danger text-center">
+      <span th:text="${errorMessage}"></span>
+    </div>
+
     <div class="form-header">Nhập chỉ số nước</div>
     <form th:action="@{/water-usage/create}" method="post">
-      <input type="hidden" name="contractId" th:value="${contractId}" />
+
+      <!-- ✅ Contract ID -->
+      <input type="hidden" name="contractId" th:value="${contract.id}" />
 
       <div class="form-group">
         <label class="form-label">Địa chỉ</label>
-        <input type="text" class="form-control" th:value="${address}" readonly>
+        <input type="text" class="form-control" th:value="${contract.apartment.address}" readonly>
       </div>
 
       <div class="form-group">
         <label class="form-label">Chủ sở hữu</label>
-        <input type="text" class="form-control" th:value="${owner}" readonly>
+        <input type="text" class="form-control" th:value="${contract.customer.fullName}" readonly>
       </div>
 
       <div class="form-group">
         <label class="form-label">Dịch vụ</label>
-        <input type="text" class="form-control" th:value="${service}" readonly>
+        <input type="text" class="form-control" th:value="${contract.serviceType.name}" readonly>
       </div>
 
+      <!-- ✅ Month Picker với Calendar -->
       <div class="form-group">
-        <label class="form-label">Thời gian</label>
-        <input type="month" class="form-control" name="month" required>
+        <label class="form-label">Tháng cần nhập</label>
+        <div class="month-picker">
+          <input type="month"
+                 id="monthPicker"
+                 name="month"
+                 class="form-control month-input"
+                 required>
+        </div>
+        <small class="form-text text-muted">Chọn tháng từ lịch. Các tháng đã tạo hóa đơn sẽ không thể chọn.</small>
       </div>
 
       <div class="form-group">
@@ -68,6 +109,141 @@
     </form>
   </div>
 </div>
+
+<!-- JavaScript để xử lý logic disable các tháng đã sử dụng -->
+<script th:inline="javascript">
+  document.addEventListener('DOMContentLoaded', function() {
+      const monthPicker = document.getElementById('monthPicker');
+
+      // Lấy danh sách các tháng đã sử dụng từ Thymeleaf
+      const usedMonths = /*[[${usedMonths}]]*/ [];
+
+      console.log('Used months:', usedMonths);
+
+      // Thiết lập giới hạn thời gian
+      const now = new Date();
+      const maxDate = new Date(now.getFullYear() + 2, 11, 31); // Cho phép đến 2 năm tới
+      const minDate = new Date(now.getFullYear() - 2, 0, 1); // Cho phép từ 2 năm trước
+
+      // Set min và max cho input (mở rộng phạm vi)
+      monthPicker.min = minDate.toISOString().slice(0, 7);
+      monthPicker.max = maxDate.toISOString().slice(0, 7);
+
+      // Tạo style để làm mờ các tháng đã sử dụng
+      const style = document.createElement('style');
+      style.textContent = `
+          /* Style cho month picker khi có tháng bị disable */
+          input[type="month"]::-webkit-calendar-picker-indicator {
+              filter: none;
+          }
+
+          /* Custom tooltip */
+          .month-picker-wrapper {
+              position: relative;
+          }
+
+          .month-tooltip {
+              position: absolute;
+              bottom: -25px;
+              left: 0;
+              background: #f8f9fa;
+              border: 1px solid #dee2e6;
+              padding: 5px 8px;
+              border-radius: 4px;
+              font-size: 0.8rem;
+              color: #6c757d;
+              display: none;
+              z-index: 1000;
+          }
+
+          .month-tooltip.show {
+              display: block;
+          }
+      `;
+      document.head.appendChild(style);
+
+<!--      // Thêm tooltip để hiển thị các tháng đã sử dụng-->
+<!--      const tooltip = document.createElement('div');-->
+<!--      tooltip.className = 'month-tooltip';-->
+<!--      if (usedMonths.length > 0) {-->
+<!--          tooltip.textContent = 'Các tháng đã có hóa đơn: ' + usedMonths.join(', ');-->
+<!--      } else {-->
+<!--          tooltip.textContent = 'Chưa có tháng nào có hóa đơn';-->
+<!--      }-->
+<!--      monthPicker.parentElement.appendChild(tooltip);-->
+
+<!--      // Hiển thị tooltip khi focus-->
+<!--      monthPicker.addEventListener('focus', function() {-->
+<!--          tooltip.classList.add('show');-->
+<!--      });-->
+
+<!--      monthPicker.addEventListener('blur', function() {-->
+<!--          tooltip.classList.remove('show');-->
+<!--      });-->
+
+      // Xử lý khi người dùng chọn tháng
+      monthPicker.addEventListener('input', function() {
+          const selectedMonth = this.value;
+
+          // Kiểm tra nếu chọn tháng đã sử dụng
+          if (usedMonths.includes(selectedMonth)) {
+              // Làm mờ input và hiển thị cảnh báo
+              this.style.backgroundColor = '#f8f9fa';
+              this.style.color = '#6c757d';
+              this.style.borderColor = '#dc3545';
+
+              // Hiển thị thông báo
+              alert('⚠️ Tháng ' + selectedMonth + ' đã tạo hóa đơn rồi!\nVui lòng chọn tháng khác.');
+
+              // Reset về trạng thái bình thường và xóa giá trị
+              setTimeout(() => {
+                  this.value = '';
+                  this.style.backgroundColor = '';
+                  this.style.color = '';
+                  this.style.borderColor = '';
+              }, 100);
+
+              return false;
+          } else {
+              // Reset style về bình thường nếu chọn tháng hợp lệ
+              this.style.backgroundColor = '';
+              this.style.color = '';
+              this.style.borderColor = '';
+          }
+      });
+
+      // Ngăn chặn submit nếu chọn tháng đã sử dụng
+      document.querySelector('form').addEventListener('submit', function(e) {
+          const selectedMonth = monthPicker.value;
+
+          if (!selectedMonth) {
+              alert('Vui lòng chọn tháng!');
+              e.preventDefault();
+              return false;
+          }
+
+          if (usedMonths.includes(selectedMonth)) {
+              alert('❌ Không thể tạo hóa đơn cho tháng đã sử dụng!');
+              e.preventDefault();
+              return false;
+          }
+      });
+
+      // Thêm hiệu ứng visual khi hover
+      monthPicker.addEventListener('mouseenter', function() {
+          if (usedMonths.length > 0) {
+              tooltip.classList.add('show');
+          }
+      });
+
+      monthPicker.addEventListener('mouseleave', function() {
+          if (!this.matches(':focus')) {
+              tooltip.classList.remove('show');
+          }
+      });
+  });
+</script>
+
 
 </body>
 </html>

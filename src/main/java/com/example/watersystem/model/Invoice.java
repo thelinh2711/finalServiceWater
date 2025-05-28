@@ -28,7 +28,7 @@ public class Invoice {
     @Column(name = "createdAt")
     private LocalDate createdAt;
 
-    @OneToOne
+    @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "tblWaterUsageId")
     private WaterUsage waterUsage;
 

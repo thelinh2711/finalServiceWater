@@ -86,7 +86,7 @@
 <body>
 <div class="form-container">
   <div class="form-title">Thông tin khách hàng</div>
-  <form th:action="@{/customers/update/{id}(id=${customer.id})}" th:object="${customer}" method="post">
+  <form th:action="@{/customers/update}" th:object="${customer}" method="post">
     <input type="hidden" th:field="*{id}">
 
     <div class="form-group">
@@ -106,7 +106,7 @@
 
     <div class="form-group">
       <label for="birthDate">Ngày sinh</label>
-      <input type="date" id="birthDate" th:value="${customer.birthDate != null ? #temporals.format(customer.birthDate, 'yyyy-MM-dd') : ''}" name="birthDate">
+      <input type="date" id="birthDate" th:field="*{birthDate}">
     </div>
 
     <div class="button-group">
@@ -114,6 +114,7 @@
       <a th:href="@{/customers/{id}(id=${customer.id})}" class="btn btn-cancel">Hủy</a>
     </div>
   </form>
+
 </div>
 </body>
 </html>

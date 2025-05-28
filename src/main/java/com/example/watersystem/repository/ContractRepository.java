@@ -18,5 +18,6 @@ public interface ContractRepository extends JpaRepository<Contract, Integer> {
     @Query("SELECT c FROM Contract c WHERE c.apartment.id = :apartmentId")
     Contract findByApartmentId(@Param("apartmentId") int apartmentId);
     List<Contract> findByActiveTrue();
+    Contract findByApartment(Apartment apartment);
 
 }
