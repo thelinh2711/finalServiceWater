@@ -30,7 +30,7 @@ public class InvoiceService {
         Contract contract = usage.getContract();
         String month = usage.getMonth();
 
-        // ✅ Kiểm tra đã tồn tại usage cùng tháng cho hợp đồng này
+        // Kiểm tra đã tồn tại usage cùng tháng cho hợp đồng này
         Optional<WaterUsage> existing = waterUsageRepository
                 .findByContractIdAndMonth(contract.getId(), month);
 
@@ -38,7 +38,7 @@ public class InvoiceService {
             throw new RuntimeException("Tháng này đã được tạo hóa đơn.");
         }
 
-        // ✅ Tìm chỉ số trước đó (nếu có)
+        // Tìm chỉ số trước đó (nếu có)
         WaterUsage last = waterUsageRepository
                 .findTopByContractIdOrderByMonthDesc(contract.getId())
                 .orElse(null);
@@ -50,13 +50,13 @@ public class InvoiceService {
         usage.setPreviousIndex(previous);
         usage.setUsedIndex(used);
 
-        // ✅ Tính tiền nước theo bậc giá
+        // Tính tiền nước theo bậc giá
         List<TieredPrice> tierList = tieredPriceRepository.findByServiceTypeId(
                 contract.getServiceType().getId()
         );
-        BigDecimal totalAmount = applyTieredPricing(used, tierList);
+        BigDecimal totalAmount = applyTieredPricing(usage, tierList);
 
-        // ✅ Tạo hóa đơn gắn với usage
+        // Tạo hóa đơn gắn với usage
         Invoice invoice = Invoice.builder()
                 .waterUsage(usage)
                 .totalAmount(totalAmount)
@@ -68,9 +68,9 @@ public class InvoiceService {
     }
 
 
-    private BigDecimal applyTieredPricing(int used, List<TieredPrice> tiers) {
+    private BigDecimal applyTieredPricing(WaterUsage usage, List<TieredPrice> tiers) {
         BigDecimal total = BigDecimal.ZERO;
-        int remainingUsage = used;
+        int remainingUsage = usage.getCurrentIndex() - (usage.getPreviousIndex() != null ? usage.getPreviousIndex() : 0);
 
         for (TieredPrice tier : tiers) {
             int min = tier.getMinValue();
@@ -83,15 +83,10 @@ public class InvoiceService {
                 tierUsage = remainingUsage;
             } else {
                 int max = maxObj;
-                // Tính đúng lượng nước thuộc bậc này
                 if (min == 0) {
                     tierUsage = Math.min(remainingUsage, max);
                 } else {
-                    if(remainingUsage<=max-min+1){
-                        tierUsage = remainingUsage;
-                    } else {
-                        tierUsage = max - min + 1;
-                    }
+                    tierUsage = Math.min(remainingUsage, max - min + 1);
                 }
             }
 

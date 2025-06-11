@@ -25,6 +25,4 @@ public class Apartment {
     @JoinColumn(name = "tblCustomerId")
     private Customer customer;
 
-    @OneToMany(mappedBy = "apartment")
-    private List<Contract> contracts;
 }

@@ -23,9 +23,4 @@ public class WaterServiceType {
     @Column(name = "note", length = 255)
     private String note;
 
-    @OneToMany(mappedBy = "serviceType")
-    private List<Contract> contracts;
-
-    @OneToMany(mappedBy = "serviceType")
-    private List<TieredPrice> tieredPrices;
 }

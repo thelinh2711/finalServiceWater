@@ -33,9 +33,4 @@ public class AdminUser {
     @Column(name = "role", length = 255)
     private String role;
 
-    @OneToMany(mappedBy = "adminUser")
-    private List<Invoice> invoices;
-
-    @OneToMany(mappedBy = "adminUser")
-    private List<Payment> payments;
 }

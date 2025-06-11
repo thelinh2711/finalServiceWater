@@ -32,7 +32,7 @@ public class WaterUsageController {
         Contract contract = contractService.getByApartment(apartment);
         WaterUsage lastUsage = waterUsageService.getLastUsage(contract);
 
-        // ✅ Truy danh sách các tháng đã có hóa đơn
+        // Truy danh sách các tháng đã có hóa đơn
         List<String> usedMonths = waterUsageService.getUsedMonths(contract); // kiểu yyyy-MM
 
         model.addAttribute("contract", contract);
@@ -42,37 +42,37 @@ public class WaterUsageController {
         return "waterUsageInput";
     }
 
-    // ✅ Xử lý tạo chỉ số và hóa đơn nước
+    // Xử lý tạo chỉ số và hóa đơn nước
     @PostMapping("/create")
     public String createUsageAndInvoice(@RequestParam("contractId") Integer contractId,
                                         @RequestParam("currentIndex") int currentIndex,
                                         @RequestParam("month") String month,
                                         RedirectAttributes redirectAttributes) {
         try {
-            // ✅ Lấy đối tượng Contract
+            // Lấy đối tượng Contract
             Contract contract = contractService.getById(contractId);
 
-            // ✅ Tạo WaterUsage với thông tin đầu vào
+            // Tạo WaterUsage với thông tin đầu vào
             WaterUsage usage = new WaterUsage();
             usage.setContract(contract);
             usage.setCurrentIndex(currentIndex);
             usage.setMonth(month);
 
-            // ✅ Gọi service tạo hóa đơn từ WaterUsage (hướng đối tượng)
+            // Gọi service tạo hóa đơn từ WaterUsage (hướng đối tượng)
             Invoice invoice = invoiceService.createInvoiceFromUsage(usage);
 
-            // ✅ Chuyển hướng đến trang chi tiết hóa đơn
+            // Chuyển hướng đến trang chi tiết hóa đơn
             return "redirect:/invoices/detail?invoiceId=" + invoice.getId();
 
         } catch (RuntimeException e) {
-            // ✅ Đưa thông báo lỗi ra giao diện
+            // Đưa thông báo lỗi ra giao diện
             redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
 
-            // ✅ Truy xuất lại đối tượng Contract để lấy apartmentId
+            // Truy xuất lại đối tượng Contract để lấy apartmentId
             Contract contract = contractService.getById(contractId);
             redirectAttributes.addAttribute("apartmentId", contract.getApartment().getId());
 
-            // ✅ Quay lại form nhập
+            //Quay lại form nhập
             return "redirect:/water-usage/input";
         }
     }

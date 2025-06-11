@@ -36,6 +36,4 @@ public class Invoice {
     @JoinColumn(name = "tblAdminUserId")
     private AdminUser adminUser;
 
-    @OneToMany(mappedBy = "invoice")
-    private List<Payment> payments;
 }

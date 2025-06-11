@@ -23,13 +23,6 @@ public class InvoiceController {
     @Autowired
     private InvoiceService invoiceService;
 
-//    @PostMapping("/generate")
-//    public String generateInvoice(@RequestParam("waterUsageId") Integer waterUsageId, Model model) {
-//        Invoice invoice = invoiceService.generateInvoice(waterUsageId);
-//        model.addAttribute("invoice", invoice);
-//        return "invoiceDetail";
-//    }
-
     @GetMapping("/detail")
     public String showInvoiceDetail(@RequestParam("invoiceId") Integer invoiceId, Model model) {
         Invoice invoice = invoiceService.getById(invoiceId);

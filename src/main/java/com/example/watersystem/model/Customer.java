@@ -39,9 +39,4 @@ public class Customer {
     @Column(name = "creatAt", updatable = false)
     private LocalDate createdAt;
 
-    @OneToMany(mappedBy = "customer")
-    private List<Apartment> apartments;
-
-    @OneToMany(mappedBy = "customer")
-    private List<Contract> contracts;
 }

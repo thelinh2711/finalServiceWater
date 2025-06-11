@@ -33,7 +33,6 @@ public class CustomerService {
         return customerRepository.save(origin);
     }
 
-
     // Lưu mới hoặc cập nhật khách hàng
     public void save(Customer customer) {
         customerRepository.save(customer);

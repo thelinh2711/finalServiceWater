@@ -31,6 +31,4 @@ public class WaterUsage {
     @JoinColumn(name = "tblContractId")
     private Contract contract;
 
-    @OneToOne(mappedBy = "waterUsage")
-    private Invoice invoice;
 }

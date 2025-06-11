@@ -33,9 +33,6 @@ public class Contract {
     @JoinColumn(name = "tblWaterServiceTypeId")
     private WaterServiceType serviceType;
 
-    @OneToMany(mappedBy = "contract")
-    private List<WaterUsage> waterUsages;
-
     @Builder.Default
     @Column(name = "active")
     private Boolean active = true;

@@ -106,8 +106,7 @@
 
     <div class="form-group">
       <label for="birthDate">Ngày sinh</label>
-      <input type="date" id="birthDate" th:field="*{birthDate}">
-    </div>
+      <input type="date" id="birthDate" th:value="${customer.birthDate != null ? #temporals.format(customer.birthDate, 'yyyy-MM-dd') : ''}" name="birthDate">
 
     <div class="button-group">
       <button type="submit" class="btn btn-save">Lưu</button>
