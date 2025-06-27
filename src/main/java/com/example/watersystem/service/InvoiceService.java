@@ -1,5 +1,6 @@
 package com.example.watersystem.service;
 
+import com.example.watersystem.dto.CustomerRevenueDTO;
 import com.example.watersystem.model.*;
 import com.example.watersystem.repository.*;
 import lombok.RequiredArgsConstructor;
@@ -16,6 +17,10 @@ public class InvoiceService {
     private final WaterUsageRepository waterUsageRepository;
     private final TieredPriceRepository tieredPriceRepository;
     private final ContractService contractService;
+
+    public List<CustomerRevenueDTO> getCustomerRevenue(LocalDate from, LocalDate to) {
+        return invoiceRepository.getCustomerRevenueBetween(from, to);
+    }
 
     public Invoice getById(Integer id) {
         return invoiceRepository.findById(id)

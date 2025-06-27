@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>Thống kê doanh thu theo khách hàng</title>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+  <style>
+    body { padding: 20px; background-color: #f9f9f9; font-family: 'Segoe UI', sans-serif; }
+    h2 { margin-bottom: 20px; }
+    .table { margin-top: 20px; background-color: #fff; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+  </style>
+</head>
+<body>
+<div class="container">
+  <h2>Thống kê doanh thu khách hàng</h2>
+
+  <!-- FORM chọn ngày -->
+  <form th:action="@{/statistics/revenue-by-customer}" method="get" class="form-inline mb-3">
+    <label for="from" class="mr-2">Từ ngày:</label>
+    <input type="date" id="from" name="from" class="form-control mr-3"
+           th:value="${from != null} ? ${#temporals.format(from, 'yyyy-MM-dd')} : ''" required>
+
+    <label for="to" class="mr-2">Đến ngày:</label>
+    <input type="date" id="to" name="to" class="form-control mr-3"
+           th:value="${to != null} ? ${#temporals.format(to, 'yyyy-MM-dd')} : ''" required>
+
+    <button type="submit" class="btn btn-primary">Xem thống kê</button>
+  </form>
+
+
+  <!-- Bảng kết quả -->
+  <table class="table table-bordered" th:if="${revenues != null}">
+    <thead class="thead-dark">
+    <tr>
+      <th>STT</th>
+      <th>Tên khách hàng</th>
+      <th>Tổng doanh thu (VNĐ)</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="item, iterStat : ${revenues}">
+      <td th:text="${iterStat.count}">1</td>
+      <td th:text="${item.customerName}">Nguyễn Văn A</td>
+      <td th:text="${#numbers.formatDecimal(item.totalRevenue, 0, 'COMMA', 3, 'POINT')}">1,000,000</td>
+    </tr>
+    </tbody>
+  </table>
+</div>
+</body>
+</html>
